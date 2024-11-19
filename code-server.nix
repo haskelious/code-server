@@ -10,6 +10,16 @@ let
     fileset = ./envs;
   };
 
+  # the /etc/profile script will be executed by the shell starting code-server
+  profile = pkgs.runCommand "profile" { } ''
+    mkdir -p $out/etc
+    cat >> $out/etc/profile << EOF
+    # ensure necessary PATH and environment settings for nix
+    source /etc/profile.d/nix.sh
+    EOF
+    chmod +x $out/etc/profile
+    '';
+
 in pkgs.dockerTools.buildImage {
   inherit uid;
   inherit gid;
@@ -20,7 +30,7 @@ in pkgs.dockerTools.buildImage {
   # build a base image with bash, core linux tools, nix tools, and certificates
   copyToRoot = pkgs.buildEnv {
     name = "env";
-    pathsToLink = [ "/bin" "/etc" ];
+    pathsToLink = [ "/bin" "/etc" "/lib" "/envs" ];
     paths =
 
       # dockerTools helper packages
@@ -32,6 +42,7 @@ in pkgs.dockerTools.buildImage {
 
       # minimal set of common shell requirements
       (with pkgs; [
+        profile
         iana-etc
         bashInteractive
         busybox
@@ -42,8 +53,12 @@ in pkgs.dockerTools.buildImage {
       (with pkgs; [
         git
         openssl
+        stdenv.cc.cc.lib
         code-server
-      ]);
+      ]) ++
+
+      # example development environments
+      [ envs ];
   };
 
   # set the entrypoint, user working folder, certificates env var
@@ -68,6 +83,7 @@ in pkgs.dockerTools.buildImage {
       "USER=nix"
       "NIX_PATH=nixpkgs=channel:nixos-unstable"
       "NIX_ENFORCE_PURITY=0"
+      "LD_LIBRARY_PATH=/lib"
     ];
   };
 
