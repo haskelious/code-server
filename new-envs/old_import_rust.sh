@@ -1,11 +1,7 @@
 #!/bin/env bash
 
 # install recommended packages into the environment
-nix-env -f '<nixpkgs>' --log-format bar -iA clang rustup
-
-# use rustup to install the toolchain
-rustup toolchain install stable
-rustup component add rust-analyzer
+nix-env -f '<nixpkgs>' -iA clang rustc cargo clippy rustfmt rust-analyzer
 
 # install recommended VSCode extensions
 code-server --install-extension rust-lang.rust-analyzer && \
