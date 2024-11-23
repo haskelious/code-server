@@ -20,6 +20,53 @@ let
     chmod +x $out/etc/profile
     '';
 
+  entryPoint = pkgs.writeShellScript "entrypoint.sh" ''
+    set -e
+
+    # input environment variables
+    # HTTPS, CERT, CERTKEY, HOST, INSECURE, PASSOWRD, HASHED_PASSWORD, PORT
+
+    # disallow user to set internal variables via environment
+    unset -v _CERT _CERTKEY _HOST _AUTH _ADDR _OPTS
+
+    if [ "$HTTPS" = "true" ]; then
+
+        if [ -n "$CERT" ]; then
+            _CERT=("--cert" "$CERT")
+
+            if [ -n "$CERTKEY" ]; then
+                _CERTKEY=("--cert-key" "$CERTKEY")
+            fi
+        else
+            _CERT=("--cert")
+
+            if [ -n "$HOST" ]; then
+                _HOST=("--cert-host" "$HOST")
+            fi
+        fi
+    fi
+
+    if [ "$INSECURE" = "true" ]; then
+        _AUTH=("--auth" "none")
+    elif [ -n "$PASSWORD" ] || [ -n "$HASHED_PASSWORD" ]; then
+        _AUTH=("--auth" "password")
+    else
+        _AUTH=("--auth" "password")
+    fi
+
+    if [ -n "$PORT" ]; then
+        _ADDR=("--bind-addr" "0.0.0.0:$PORT")
+    elif [ -n "$HTTPS" ]; then
+        _ADDR=("--bind-addr" "0.0.0.0:8443")
+    else
+        _ADDR=("--bind-addr" "0.0.0.0:8080")
+    fi
+
+    _OPTS=("--disable-getting-started-override")
+
+    exec code-server ''${_CERT[@]} ''${_CERTKEY[@]} ''${_HOST[@]} ''${_AUTH[@]} ''${_ADDR[@]} ''${_OPTS[@]}
+  '';
+
 in pkgs.dockerTools.buildImage {
   inherit uid;
   inherit gid;
@@ -30,7 +77,7 @@ in pkgs.dockerTools.buildImage {
   # build a base image with bash, core linux tools, nix tools, and certificates
   copyToRoot = pkgs.buildEnv {
     name = "env";
-    pathsToLink = [ "/bin" "/etc" "/lib" "/envs" ];
+    pathsToLink = [ "/bin" "/etc" "/lib" "/lib64" "/envs" ];
     paths =
 
       # dockerTools helper packages
@@ -53,6 +100,8 @@ in pkgs.dockerTools.buildImage {
       (with pkgs; [
         git
         openssl
+        glibc
+        zlib
         stdenv.cc.cc.lib
         code-server
       ]) ++
@@ -71,7 +120,8 @@ in pkgs.dockerTools.buildImage {
 
     # load the nix scripts at startup so that PATH is set
     #Cmd = [ "bash" "--rcfile" "/etc/profile.d/nix.sh" ];
-    Cmd = [ "code-server" "--cert" "--bind-addr" "0.0.0.0:8443" ];
+    Cmd = [ "/bin/bash" ];
+    EntryPoint = [ entryPoint ];
     ExposedPorts = {
       "8443/tcp" = {};
     };
@@ -107,5 +157,8 @@ in pkgs.dockerTools.buildImage {
     # ensure tmp exists with correct permissions
     mkdir -p /tmp
     chmod 1777 /tmp
+
+    # allow binaries to run without patching
+    ln -sf ${pkgs.glibc}/lib64/ld-linux-x86-64.so.* /lib64
   '';
 }
