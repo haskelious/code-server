@@ -40,6 +40,6 @@ else
     _ADDR=("--bind-addr" "0.0.0.0:8080")
 fi
 
-_OPTS=("--disable-getting-started-override")
+_OPTS=("--disable-getting-started-override" "--disable-update-check")
 
 exec code-server ${_CERT[@]} ${_CERTKEY[@]} ${_HOST[@]} ${_AUTH[@]} ${_ADDR[@]} ${_OPTS[@]}

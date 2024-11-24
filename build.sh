@@ -3,7 +3,7 @@
 docker=podman
 
 # build nix-base docker image
-nix-build --quiet --log-format bar code-server.nix && \
+nix-build -I nixpkgs=channel:nixos-unstable --quiet --log-format bar code-server.nix && \
 
 # import image
 ${docker} load -i ./result && \
