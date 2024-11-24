@@ -20,52 +20,7 @@ let
     chmod +x $out/etc/profile
     '';
 
-  entryPoint = pkgs.writeShellScript "entrypoint.sh" ''
-    set -e
-
-    # input environment variables
-    # HTTPS, CERT, CERTKEY, HOST, INSECURE, PASSOWRD, HASHED_PASSWORD, PORT
-
-    # disallow user to set internal variables via environment
-    unset -v _CERT _CERTKEY _HOST _AUTH _ADDR _OPTS
-
-    if [ "$HTTPS" = "true" ]; then
-
-        if [ -n "$CERT" ]; then
-            _CERT=("--cert" "$CERT")
-
-            if [ -n "$CERTKEY" ]; then
-                _CERTKEY=("--cert-key" "$CERTKEY")
-            fi
-        else
-            _CERT=("--cert")
-
-            if [ -n "$HOST" ]; then
-                _HOST=("--cert-host" "$HOST")
-            fi
-        fi
-    fi
-
-    if [ "$INSECURE" = "true" ]; then
-        _AUTH=("--auth" "none")
-    elif [ -n "$PASSWORD" ] || [ -n "$HASHED_PASSWORD" ]; then
-        _AUTH=("--auth" "password")
-    else
-        _AUTH=("--auth" "password")
-    fi
-
-    if [ -n "$PORT" ]; then
-        _ADDR=("--bind-addr" "0.0.0.0:$PORT")
-    elif [ -n "$HTTPS" ]; then
-        _ADDR=("--bind-addr" "0.0.0.0:8443")
-    else
-        _ADDR=("--bind-addr" "0.0.0.0:8080")
-    fi
-
-    _OPTS=("--disable-getting-started-override")
-
-    exec code-server ''${_CERT[@]} ''${_CERTKEY[@]} ''${_HOST[@]} ''${_AUTH[@]} ''${_ADDR[@]} ''${_OPTS[@]}
-  '';
+  entryPoint = pkgs.writeScript "entrypoint.sh" (builtins.readFile ./entrypoint.sh);
 
 in pkgs.dockerTools.buildImage {
   inherit uid;
@@ -82,31 +37,20 @@ in pkgs.dockerTools.buildImage {
 
       # dockerTools helper packages
       (with pkgs.dockerTools; [
-        caCertificates
-        usrBinEnv
-        binSh
+        caCertificates usrBinEnv binSh
       ]) ++
 
       # minimal set of common shell requirements
       (with pkgs; [
-        profile
-        iana-etc
-        bashInteractive
-        busybox
-        nix
+        profile iana-etc bashInteractive busybox nix
       ]) ++
 
       # development environment
       (with pkgs; [
-        git
-        openssl
-        glibc
-        zlib
-        stdenv.cc.cc.lib
-        code-server
+        git openssl glibc zlib stdenv.cc.cc.lib code-server
       ]) ++
 
-      # example development environments
+      # example development toolkits
       [ envs ];
   };
 
@@ -116,16 +60,16 @@ in pkgs.dockerTools.buildImage {
     # container will run as nix user
     WorkingDir = "/home/nix";
     Volumes = { "/home/nix" = { }; };
+    Volumes = { "/certs" = { }; };
     User = "nix";
 
     # load the nix scripts at startup so that PATH is set
-    #Cmd = [ "bash" "--rcfile" "/etc/profile.d/nix.sh" ];
     Cmd = [ "/bin/bash" ];
-    EntryPoint = [ entryPoint ];
+    Entrypoint = [ entryPoint ];
     ExposedPorts = {
       "8443/tcp" = {};
+      "8080/tcp" = {};
     };
-    #Entrypoint = [ ${entryPoint} ];
 
     # other common environment variables
     Env = [
