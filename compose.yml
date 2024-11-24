@@ -1,18 +1,19 @@
 services:
   code-server:
-    image: code-server:latest
+    image: haskelious/code-server:latest
     environment:
       - PASSWORD=changeme
       - HTTPS=true
       #- HOST=myhost.exanple.com
-      #- CERT=/certs/server.crt
-      #- CERTKEY=/certs/server.key
+      #- CERT=/certs/cert.pem
+      #- CERTKEY=/certs/key.pem
       #- PORT=8443
       #- INSECURE=false
     ports:
       - "8443:8443"
     volumes:
       - code-server:/home/nix
+      #- ./certs:/certs
     restart: unless-stopped
 
 volumes:
