@@ -5,6 +5,7 @@ let
   uid = "1000";
   gid = "100";
 
+  # include the static ./envs folder with example development environments
   envs = pkgs.lib.fileset.toSource {
     root = ./.;
     fileset = ./envs;
@@ -20,6 +21,20 @@ let
     chmod +x $out/etc/profile
     '';
 
+  # list of all packages to be included in the image
+  contents =
+    # dockerTools helper packages
+    (with pkgs.dockerTools; [ caCertificates usrBinEnv binSh ]) ++
+
+    # minimal set of common shell requirements
+    (with pkgs; [ profile iana-etc bashInteractive busybox nix ]) ++
+
+    # development environment
+    (with pkgs; [ git openssl glibc zlib stdenv.cc.cc.lib code-server ]) ++
+
+    # example development toolkits
+    [ envs ];
+
   entryPoint = pkgs.writeScript "entrypoint.sh" (builtins.readFile ./entrypoint.sh);
 
 in pkgs.dockerTools.buildImage {
@@ -33,25 +48,7 @@ in pkgs.dockerTools.buildImage {
   copyToRoot = pkgs.buildEnv {
     name = "env";
     pathsToLink = [ "/bin" "/etc" "/lib" "/lib64" "/envs" ];
-    paths =
-
-      # dockerTools helper packages
-      (with pkgs.dockerTools; [
-        caCertificates usrBinEnv binSh
-      ]) ++
-
-      # minimal set of common shell requirements
-      (with pkgs; [
-        profile iana-etc bashInteractive busybox nix
-      ]) ++
-
-      # development environment
-      (with pkgs; [
-        git openssl glibc zlib stdenv.cc.cc.lib code-server
-      ]) ++
-
-      # example development toolkits
-      [ envs ];
+    paths = contents;
   };
 
   # set the entrypoint, user working folder, certificates env var

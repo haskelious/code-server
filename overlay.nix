@@ -217,21 +217,29 @@ self: super: {
         # Record the contents of the tarball with ls_tar.
         ls_tar temp/layer.tar >> baseFiles
 
+        # OVERLAY: the /nix/var/nix folder is required for nix commands
+        mkdir -p ./nix/var/nix
+        echo "./nix/var" >> layerFiles
+        echo "./nix/var/nix" >> layerFiles
+
+        # OVERLAY: add current packages into /gcroots to protect them from garbage collection
+        gcroots="./nix/var/nix/gcroots"
+        mkdir -p $gcroots
+        echo $gcroots >> layerFiles
+        for path in $(cat $layerClosure); do
+          gcroot="$gcroots/$(basename $path)"
+          ln -s $path $gcroot
+          find $gcroot >> layerFiles
+        done
+
         # Append nix/store directory to the layer so that when the layer is loaded in the
         # image /nix/store has read permissions for non-root users.
         # nix/store is added only if the layer has /nix/store paths in it.
         if [ $(wc -l < $layerClosure) -gt 1 ] && [ $(grep -c -e "^/nix/store$" baseFiles) -eq 0 ]; then
-          mkdir -p nix/store
-
-          # OVERLAY: this folder is required for nix commands
-          mkdir -p nix/var/nix
+          mkdir -p ./nix/store
           chmod -R 555 nix
           echo "./nix" >> layerFiles
           echo "./nix/store" >> layerFiles
-
-          # OVERLAY: include these folders on image layer
-          echo "./nix/var" >> layerFiles
-          echo "./nix/var/nix" >> layerFiles
         fi
 
         # Get the files in the new layer which were *not* present in
