@@ -247,10 +247,14 @@ self: super: {
         comm <(sort -n baseFiles|uniq) \
              <(sort -n layerFiles|uniq|grep -v ${layer}) -1 -3 > newFiles
 
+        # OVERLAY: modify mode for these folders
+        chmod u+w ./nix/store
+        chmod -R u+w ./nix/var
+
         # Append the new files to the layer.
-        # OVERLAY: modify owner, group and mode for these additional files
+        # OVERLAY: modify owner and group for these additional files
         tar -rpf temp/layer.tar --hard-dereference --sort=name --mtime="@$SOURCE_DATE_EPOCH" \
-          --owner=1000 --group=100 --mode=u+w --no-recursion --verbatim-files-from --files-from newFiles
+          --owner=1000 --group=100 --no-recursion --verbatim-files-from --files-from newFiles
 
         echo "Adding meta..."
 
