@@ -27,7 +27,7 @@ let
     (with pkgs.dockerTools; [ caCertificates usrBinEnv binSh ]) ++
 
     # minimal set of common shell requirements
-    (with pkgs; [ profile iana-etc bashInteractive busybox nix ]) ++
+    (with pkgs; [ profile iana-etc bashInteractive busybox groff nix ]) ++
 
     # development environment
     (with pkgs; [ git openssl glibc zlib stdenv.cc.cc.lib code-server ]) ++

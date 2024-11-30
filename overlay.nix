@@ -223,14 +223,14 @@ self: super: {
         echo "./nix/var/nix" >> layerFiles
 
         # OVERLAY: add current packages into /gcroots to protect them from garbage collection
-        gcroots="./nix/var/nix/gcroots"
-        mkdir -p $gcroots
-        echo $gcroots >> layerFiles
-        for path in $(cat $layerClosure); do
-          gcroot="$gcroots/$(basename $path)"
-          ln -s $path $gcroot
-          find $gcroot >> layerFiles
-        done
+        #gcroots="./nix/var/nix/gcroots"
+        #mkdir -p $gcroots
+        #echo $gcroots >> layerFiles
+        #for path in $(cat $layerClosure); do
+        #  gcroot="$gcroots/$(basename $path)"
+        #  ln -s $path $gcroot
+        #  find $gcroot >> layerFiles
+        #done
 
         # Append nix/store directory to the layer so that when the layer is loaded in the
         # image /nix/store has read permissions for non-root users.
