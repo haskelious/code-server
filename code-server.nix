@@ -19,7 +19,7 @@ let
     source /etc/profile.d/nix.sh
     EOF
     chmod +x $out/etc/profile
-    '';
+  '';
 
   # list of all packages to be included in the image
   contents =
@@ -58,6 +58,7 @@ in pkgs.dockerTools.buildImage {
     WorkingDir = "/home/nix";
     Volumes = { "/home/nix" = { }; };
     Volumes = { "/certs" = { }; };
+    Volumes = { "/data" = { }; };
     User = "nix";
 
     # load the nix scripts at startup so that PATH is set
