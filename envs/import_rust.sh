@@ -15,7 +15,7 @@ EOF
 rustup toolchain install stable
 rustup component add rust-analyzer
 cargo install cargo-expand
-cargo install cargo-watcher
+cargo install cargo-watch
 
 # install recommended VSCode extensions
 code-server --install-extension rust-lang.rust-analyzer
