@@ -57,6 +57,7 @@ in pkgs.dockerTools.buildImage {
     # container will run as nix user
     WorkingDir = "/home/nix";
     Volumes = { "/home/nix" = { }; };
+    Volumes = { "/home/nix/.cache" = { }; };
     Volumes = { "/certs" = { }; };
     Volumes = { "/data" = { }; };
     User = "nix";
