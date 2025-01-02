@@ -7,7 +7,9 @@ nix-env -f channel:nixpkgs-unstable --log-format bar -iA clang cmake gnumake rus
 mkdir -p /data/cargo /data/rustup
 cat >> ~/.bashrc << EOF
 #export CARGO_HOME=/data/cargo
+export CARGO_HOME=~/.cargo
 #export RUSTUP_HOME=/data/rustup
+export RUSTUP_HOME=~/.rustup
 export PATH=\$PATH:\$CARGO_HOME/bin
 EOF
 
@@ -16,7 +18,7 @@ source ~/.bashrc
 
 # install altenative linkers
 nix-env -f channel:nixpkgs-unstable --log-format bar -iA lld mold
-mkdir -p ~/.cargo && cat >> $CARGO_HOME/config.toml << EOF
+mkdir -p $CARGO_HOME && cat >> $CARGO_HOME/config.toml << EOF
 [target.x86_64-unknown-linux-gnu]
 linker = "clang"
 rustflags = ["-C", "link-arg=-fuse-ld=mold"]
