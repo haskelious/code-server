@@ -6,8 +6,8 @@ nix-env -f channel:nixpkgs-unstable --log-format bar -iA clang cmake gnumake rus
 # set some default paths
 mkdir -p /data/cargo /data/rustup
 cat >> ~/.bashrc << EOF
-export CARGO_HOME=/data/cargo
-export RUSTUP_HOME=/data/rustup
+#export CARGO_HOME=/data/cargo
+#export RUSTUP_HOME=/data/rustup
 export PATH=\$PATH:\$CARGO_HOME/bin
 EOF
 
