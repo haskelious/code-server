@@ -78,7 +78,7 @@ in pkgs.dockerTools.buildImage {
       "NIX_ENFORCE_PURITY=0"
       "LD_LIBRARY_PATH=/lib"
       "OPENSSL_DIR=${pkgs.openssl}"
-      "OPENSSL_LIB_DIR=${pkgs.openssl}/lib"
+      "OPENSSL_LIB_DIR=${pkgs.openssl.out}/lib"
       "OPENSSL_INCLUDE_DIR=${pkgs.openssl.dev}/include"
     ];
   };
