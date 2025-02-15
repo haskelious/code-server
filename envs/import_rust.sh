@@ -11,6 +11,7 @@ export CARGO_HOME=~/.cargo
 #export RUSTUP_HOME=/data/rustup
 export RUSTUP_HOME=~/.rustup
 export PATH=\$PATH:\$CARGO_HOME/bin
+export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:\$OPENSSL_LIB_DIR
 EOF
 
 # activate new paths
