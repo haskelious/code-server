@@ -77,9 +77,9 @@ in pkgs.dockerTools.buildImage {
       "NIX_PATH=nixpkgs=channel:nixos-unstable"
       "NIX_ENFORCE_PURITY=0"
       "LD_LIBRARY_PATH=/lib"
-      "OPENSSL_DIR=${openssl}"
-      "OPENSSL_LIB_DIR=${openssl}/lib"
-      "OPENSSL_INCLUDE_DIR=${openssl.dev}/include"
+      "OPENSSL_DIR=${pkgs.openssl}"
+      "OPENSSL_LIB_DIR=${pkgs.openssl}/lib"
+      "OPENSSL_INCLUDE_DIR=${pkgs.openssl.dev}/include"
     ];
   };
 
