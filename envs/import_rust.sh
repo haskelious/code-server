@@ -1,7 +1,7 @@
 #!/bin/env bash
 
 # install recommended packages into the environment
-nix-env -f channel:nixpkgs-unstable --log-format bar -iA gcc cmake gnumake rustup pkg-config
+nix-env -f channel:nixpkgs-unstable --log-format bar -iA clang cmake gnumake rustup pkg-config
 
 # set some default paths
 mkdir -p /data/cargo /data/rustup
